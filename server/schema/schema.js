@@ -1,12 +1,15 @@
-const { projects, clients } = require('../SampleData');
+//Importing the two mongoose models
+const ClientModel = require('../models/Client');
+const ProjectModel = require('../models/Project')
 
 //WHEN WE HAVE DIFFERENT RESOURCES WE USE THIS TO CREATES TYPES FOR ALL EG. PROJECTS, CLIENTS, BLOGS   
-const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLSchema, GraphQLList } = require('graphql');
+const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLSchema, GraphQLList,
+GraphQLNonNull, GraphQL } = require('graphql');
 
 //CLIENT TYPE
-const Client = new GraphQLObjectType({
+const ClientType = new GraphQLObjectType({
 //takes name, field (func that returns obj)
-    name: 'ClientType',
+    name: 'Client',
     fields: () => ({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
@@ -16,19 +19,19 @@ const Client = new GraphQLObjectType({
 })
 
 //PROJECT TYPE
-const Project = new GraphQLObjectType({
-    name: 'ProjectType',
+const ProjectType = new GraphQLObjectType({
+    name: 'Project',
     fields: () => ({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         description: { type: GraphQLString },
         status: { type: GraphQLString },
         client: { 
-            type: Client,
+            type: ClientType,
             resolve(parent, args) {
-                //finding the client where id matches clientId of projects
+                //finding the client where id matches clientId of projects as it is the parent
                 //client is child of project
-                return clients.find((client) => client.id === parent.clientId);
+                return ClientModel.findById(parent.clientId)
             }
         }
     })
@@ -41,41 +44,66 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         clients: {
             //this type will be implemented as the whole client array is a list
-            type: new GraphQLList(Client),
+            type: new GraphQLList(ClientType),
             //no parameters as we dont need args
             resolve() {
-                //no condition so we will just deliver all the data
-                return clients;
+                //only find() as we will return all the data
+                return ClientModel.find()
             },
         },
         client: { 
             //specifying the type that we want
-            type: Client,
+            type: ClientType,
             //to get a single client we need id, so it is going to take args
             args: { id: { type: GraphQLID} },
             //whatever we want to return or repond with,
             //takes parent and args
             resolve(parent, args) {
-                //loops through clients array anf finds that client.id === args.id
-                return clients.find(client => client.id === args.id)
+                //find the client by the argumentative id
+                return ClientModel.findById(args.id)
             }
         },
         projects: {
-            type: new GraphQLList(Project),
+            type: new GraphQLList(ProjectType),
             resolve() {
-                return projects
+                ProjectModel.find();
             }
         },
         project: {
-            type: Project,
+            type: ProjectType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return projects.find(project => project.id === args.id)
+                return ProjectModel.findById(args.id);
             }
         }
     }
 })
 
+//TO MAKE MUTATIONS WE NEED A NEW GRAPHQLOBJECT BY THAT NAME ONLY
+const mutation = new GraphQLObjectType({
+    name: 'mutation',
+    fields: {
+        addClient: {
+            type: ClientType,
+            args: {
+              name: { type: new GraphQLNonNull(GraphQLString) },
+              email: { type: new GraphQLNonNull(GraphQLString) },
+              phone: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+              const client = new ClientModel({
+                name: args.name,
+                email: args.email,
+                phone: args.phone,
+              });
+      
+              return client.save();
+            },
+          },
+    }
+})
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation
 })

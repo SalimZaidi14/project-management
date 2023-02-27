@@ -1,12 +1,14 @@
 const express = require('express');
 const app = express();
-require('dotenv').config();
- 
-const port = process.env.PORT || 5000;
-
 const { graphqlHTTP } = require('express-graphql'); 
+require('dotenv').config();
 
+const port = process.env.PORT || 5000;
 const schemaFile = require('./schema/schema');
+const connectDB = require('./config/db');
+
+//CONNECT TO DATABASE
+connectDB();
 
 //SINGLE ENDPOINT
 app.use('/graphql', graphqlHTTP({

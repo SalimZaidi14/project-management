@@ -4,7 +4,8 @@ const ProjectModel = require('../models/Project')
 
 //WHEN WE HAVE DIFFERENT RESOURCES WE USE THIS TO CREATES TYPES FOR ALL EG. PROJECTS, CLIENTS, BLOGS   
 const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLSchema, GraphQLList,
-GraphQLNonNull, GraphQL } = require('graphql');
+GraphQLNonNull, GraphQLEnumType } = require('graphql');
+const Client = require('../models/Client');
 
 //CLIENT TYPE
 const ClientType = new GraphQLObjectType({
@@ -83,23 +84,81 @@ const RootQuery = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
     name: 'mutation',
     fields: {
+        //PROJECT MUTATIONS
         addClient: {
             type: ClientType,
             args: {
-              name: { type: new GraphQLNonNull(GraphQLString) },
-              email: { type: new GraphQLNonNull(GraphQLString) },
-              phone: { type: new GraphQLNonNull(GraphQLString) },
+                //This property is used to prevent the user from entering empty values
+                //it is wrapped around the type
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                email: { type: new GraphQLNonNull(GraphQLString) },
+                phone: { type: new GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args) {
-              const client = new ClientModel({
-                name: args.name,
-                email: args.email,
-                phone: args.phone,
-              });
-      
-              return client.save();
+                //we create a new client using mongoose model 
+                //we are passing in the values
+                //these are ultimately going to come from the frontend form
+                const client = new ClientModel({
+                    name: args.name,
+                    email: args.email,
+                    phone: args.phone,
+                });
+                //we will take the client we creted and save it to the database
+                return client.save();
             },
-          },
+        },
+        deleteClient: {
+            type: ClientType,
+            //take the id of the client to delete
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            //find the client by id and remove it
+            resolve(parent, args) {
+                return ClientModel.findByIdAndRemove(args.id);
+            }
+        },
+
+        //PROJECT MUTATION
+
+        addProject: {
+            type: ProjectType,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                description: { type: new GraphQLNonNull(GraphQLString) },
+                status: {
+                    type: new GraphQLEnumType({
+                        name: 'ProjectStatus',
+                        values: {
+                            'new': { value: 'Just Started' },
+                            'progress': { value: 'In Progress' },
+                            'complete': { value: 'Completed'}
+                        }
+                    }),
+                    defaultValue: 'Just Started'
+                },
+                clientId: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            resolve(parent, args) {
+                const project = new ProjectModel({
+                    name: args.name,
+                    description: args.description,
+                    status: args.status,
+                    clientId: args.clientId
+                })
+
+                return project.save()
+            }
+        },
+        deleteProject: {
+            type: ProjectType,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            resolve(parent, args) {
+                return ProjectModel.findByIdAndRemove(args.id)
+            }
+        }
     }
 })
 

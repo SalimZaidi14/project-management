@@ -31,7 +31,6 @@ export default function Clients() {
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>ID</th>
                             <th>Phone</th>
                             <th>Email</th>
                         </tr>

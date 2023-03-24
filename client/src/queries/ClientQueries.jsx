@@ -13,5 +13,6 @@ const GET_CLIENTS = gql`
         }
     }
 `
+
 //we will export the query
 export { GET_CLIENTS }

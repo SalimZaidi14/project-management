@@ -5,7 +5,6 @@ const ProjectModel = require('../models/Project')
 //WHEN WE HAVE DIFFERENT RESOURCES WE USE THIS TO CREATES TYPES FOR ALL EG. PROJECTS, CLIENTS, BLOGS   
 const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLSchema, GraphQLList,
 GraphQLNonNull, GraphQLEnumType } = require('graphql');
-const Client = require('../models/Client');
 
 //CLIENT TYPE
 const ClientType = new GraphQLObjectType({
@@ -67,7 +66,7 @@ const RootQuery = new GraphQLObjectType({
         projects: {
             type: new GraphQLList(ProjectType),
             resolve() {
-                ProjectModel.find();
+                return ProjectModel.find()
             }
         },
         project: {

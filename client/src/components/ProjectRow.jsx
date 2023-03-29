@@ -6,6 +6,9 @@ export default function ProjectRow({ project }) {
             <td>{project.name}</td>
             <td>{project.status}</td>
             <td>{project.description}</td>
+            <td>
+                <a class="btn btn-white" href={`/project/${project.id}`}>View</a>
+            </td>
         </tr>
     )
 }

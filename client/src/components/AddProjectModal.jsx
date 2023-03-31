@@ -56,7 +56,7 @@ export default function AddProjectModal() {
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            <form>
+                            <form onSubmit={onSubmit}>
                                 <div className="mb-3">
                                     <label className="form-label">Name</label>
                                     <input className="form-control" type="text" id="name" value={name} onChange={(e) => setName(e.target.value)}/>

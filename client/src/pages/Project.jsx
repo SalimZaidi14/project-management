@@ -3,6 +3,8 @@ import ClientInfo from '../components/ClientInfo';
 import { useQuery } from '@apollo/client';
 import { GET_PROJECT } from '../queries/ProjectQueries';
 
+import DeleteProjectButton from '../components/DeleteProjectButton';
+
 export default function Project() {
   const { id } = useParams();
   const { loading, error, data } = useQuery(GET_PROJECT, { variables: { id } });
@@ -25,6 +27,7 @@ export default function Project() {
           <p className='lead'>{data.project.status}</p>
 
           <ClientInfo client={data.project.client} />
+          <DeleteProjectButton project={data.project} />
         </div>
       )}
     </>

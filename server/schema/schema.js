@@ -102,7 +102,7 @@ const mutation = new GraphQLObjectType({
                     email: args.email,
                     phone: args.phone,
                 });
-                //we will take the client we creted and save it to the database
+                //we will take the client we created and save it to the database. .save() is a mongoose function
                 return client.save();
             },
         },
@@ -114,6 +114,12 @@ const mutation = new GraphQLObjectType({
             },
             //find the client by id and remove it
             resolve(parent, args) {
+                ProjectModel.find({ clientId: args.id }).then((projects) => {
+                    projects.forEach(project => {
+                        project.remove()
+                    });
+                })
+
                 return ClientModel.findByIdAndRemove(args.id);
             }
         },
@@ -155,6 +161,8 @@ const mutation = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLID) }
             },
             resolve(parent, args) {
+                // The Project.find() method should return an array of projects that match the given clientId, 
+                //and then the forEach method is used to loop through each project in the array and remove them.
                 return ProjectModel.findByIdAndRemove(args.id)
             }
         },

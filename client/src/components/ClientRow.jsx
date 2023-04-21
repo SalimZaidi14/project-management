@@ -25,7 +25,7 @@ export default function ClientRow({ client }) {
         /*
         there is a function called update and in it, we can pass in cache and here we are setting the data to response of client
         we will get the clients from the cache
-        it will not make a whole new request
+        it will not make a whole new request 
         then we will write to the cache  
         */
 
